@@ -15,7 +15,7 @@ export default function ArenaResponse({ solution1, solution2, judge }) {
         {/* Solution 1 */}
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-8 shadow-sm flex flex-col transition-all hover:shadow-md">
           <h3 className="text-sm font-semibold tracking-wide uppercase text-zinc-500 mb-6 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500"></span> Solution 1
+            <span className="w-2 h-2 rounded-full bg-emerald-500"></span> Mistral Medium
           </h3>
           <div className="text-zinc-700 dark:text-zinc-300">
             <ReactMarkdown 
@@ -51,7 +51,7 @@ export default function ArenaResponse({ solution1, solution2, judge }) {
         {/* Solution 2 */}
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-8 shadow-sm flex flex-col transition-all hover:shadow-md">
           <h3 className="text-sm font-semibold tracking-wide uppercase text-zinc-500 mb-6 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-violet-500"></span> Solution 2
+            <span className="w-2 h-2 rounded-full bg-violet-500"></span>Cohere Command
           </h3>
           <div className="text-zinc-700 dark:text-zinc-300">
             <ReactMarkdown 
@@ -88,29 +88,68 @@ export default function ArenaResponse({ solution1, solution2, judge }) {
       {/* Judge Panel */}
       {judge && (
         <div className="mt-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-8 shadow-sm">
+
           <h3 className="text-lg font-medium text-zinc-900 dark:text-zinc-100 flex items-center gap-3 mb-6">
             ⚖️ Judge Recommendations
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-4">
-              <div className="flex justify-between items-center bg-white dark:bg-zinc-900 px-5 py-3 rounded-xl border border-zinc-100 dark:border-zinc-800">
-                <span className="font-medium text-zinc-600 dark:text-zinc-400">Solution 1 Score</span>
-                <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{judge.solution_1_score}/10</span>
-              </div>
-              <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed px-2">
-                {judge.solution_1_reasoning}
+
+          {/* IF GEMINI FAILED */}
+
+          {judge.solution_1_score === 0 ? (
+
+            <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-6">
+
+              <p className="text-red-400 text-lg font-semibold mb-3">
+                ⚠ Gemini Judge Temporarily Unavailable
               </p>
-            </div>
-            <div className="space-y-4">
-               <div className="flex justify-between items-center bg-white dark:bg-zinc-900 px-5 py-3 rounded-xl border border-zinc-100 dark:border-zinc-800">
-                <span className="font-medium text-zinc-600 dark:text-zinc-400">Solution 2 Score</span>
-                <span className="text-2xl font-bold text-violet-600 dark:text-violet-400">{judge.solution_2_score}/10</span>
-              </div>
-              <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed px-2">
-                {judge.solution_2_reasoning}
+
+              <p className="text-zinc-400">
+                Showing AI model responses only. Final comparison could not be completed.
               </p>
+
             </div>
-          </div>
+
+          ) : (
+
+            /* NORMAL UI */
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+              <div className="space-y-4">
+                <div className="flex justify-between items-center bg-white dark:bg-zinc-900 px-5 py-3 rounded-xl border border-zinc-100 dark:border-zinc-800">
+                  <span className="font-medium text-zinc-600 dark:text-zinc-400">
+                    Solution 1 Score
+                  </span>
+
+                  <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                    {judge.solution_1_score}/10
+                  </span>
+                </div>
+
+                <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed px-2">
+                  {judge.solution_1_reasoning}
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex justify-between items-center bg-white dark:bg-zinc-900 px-5 py-3 rounded-xl border border-zinc-100 dark:border-zinc-800">
+                  <span className="font-medium text-zinc-600 dark:text-zinc-400">
+                    Solution 2 Score
+                  </span>
+
+                  <span className="text-2xl font-bold text-violet-600 dark:text-violet-400">
+                    {judge.solution_2_score}/10
+                  </span>
+                </div>
+
+                <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed px-2">
+                  {judge.solution_2_reasoning}
+                </p>
+              </div>
+
+            </div>
+          )}
+
         </div>
       )}
     </div>
