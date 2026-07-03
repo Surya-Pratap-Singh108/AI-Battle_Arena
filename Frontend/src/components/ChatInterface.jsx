@@ -30,37 +30,6 @@ export default function ChatInterface() {
     scrollToBottom();
   }, [messages]);
 
-  
-
-  //   const handleSend = async (e) => {
-  //     e.preventDefault();
-  //     if (!inputValue.trim()) return;
-
-  //     const response = await axios.post(
-  //   "http://localhost:3000/invoke",
-  //   {
-  //     input: inputValue
-  //   },
-  //   {
-  //     withCredentials: true
-  //   }
-  // );
-
-  //     const data = response.data
-
-  //     console.log(data)
-
-
-  //     const newMessage = {
-  //       id: Date.now(),
-  //       problem: inputValue,
-  //       // simulate the delay or instantly add dummy response
-  //       ...data.result
-  //     };
-
-  //     setMessages([ ...messages, newMessage ]);
-  //     setInputValue('');
-  //   };
   const handleSend = async (e) => {
     e.preventDefault();
     if (!inputValue.trim()) return;
@@ -85,14 +54,14 @@ export default function ChatInterface() {
     setTimeout(() => setPhase(3), 2200);
 
     const response = await axios.post(
-      "http://localhost:3000/invoke",
-      {
-        input: question
-      },
-      {
-        withCredentials: true
-      }
-    );
+  `${import.meta.env.VITE_API_URL}/invoke`,
+  {
+    input: question
+  },
+  {
+    withCredentials: true
+  }
+);
 
     const data = response.data;
 

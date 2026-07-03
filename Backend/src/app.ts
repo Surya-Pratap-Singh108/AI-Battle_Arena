@@ -8,8 +8,8 @@ const app=express();
 app.use(express.json());
 
 app.use(cors({
-  credentials:true,
-  origin:'http://localhost:5173',
+  credentials: true,
+  origin: true,
   methods: ["GET", "POST"],
 }))
 
@@ -22,15 +22,22 @@ app.get('/', async(req, res) => {
 
 })
 
-app.post('/invoke',async(req,res)=>{
-  const { input } = req.body;
-  const result=await useGraph (input);
-  res.status(200).json({
-        message: "Graph executed successfully",
-        success: true,
-        result
-    })
+app.post('/invoke', async (req, res) => {
+  try {
+    const { input } = req.body;
+    const result = await useGraph(input);
 
-})
+    res.status(200).json({
+      success: true,
+      result
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  }
+});
 
 export default app;
