@@ -12,7 +12,11 @@ app.use(cors({
   origin: true,
   methods: ["GET", "POST"],
 }))
-
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ 
+    success: true,
+    message: 'Ai Battle Arena Server is healthy' });
+});
 app.get('/', async(req, res) => {
   const result=await useGraph ("write factorial function in js");
   
