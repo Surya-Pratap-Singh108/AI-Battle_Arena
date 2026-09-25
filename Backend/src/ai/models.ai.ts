@@ -5,8 +5,9 @@ import config from "../config/config.js";
 
 
 export const geminiModel = new ChatGoogle({
-    model: "gemini-flash-latest",
+    model: "gemini-3.8-flash",
     apiKey: config.GOOGLE_API_KEY,
+    maxRetries: 2
 });
 
 export const mistralModel = new ChatMistralAI({
