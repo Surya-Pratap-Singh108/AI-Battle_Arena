@@ -95,7 +95,7 @@ export default function ArenaResponse({ solution1, solution2, judge }) {
 
           {/* IF GEMINI FAILED */}
 
-          {judge.solution_1_score === 0 ? (
+          {judge.judgeFailed  ? (
 
             <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-6">
 

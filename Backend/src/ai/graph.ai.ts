@@ -1,39 +1,40 @@
-import { StateGraph, StateSchema, type GraphNode,START,END, } from '@langchain/langgraph'
+import { StateGraph, StateSchema, type GraphNode, START, END, } from '@langchain/langgraph'
 import z from 'zod';
-import { cohoreModel, mistralModel,geminiModel } from "./models.ai.js";
-import { createAgent,HumanMessage,providerStrategy } from 'langchain';
+import { cohoreModel, mistralModel, geminiModel } from "./models.ai.js";
+import { createAgent, HumanMessage, providerStrategy } from 'langchain';
 const state = new StateSchema({
-    problem: z.string().default(''),
-    solution_1: z.string().default(''),
-    solution_2: z.string().default(''),
-    judge: z.object({
-        solution_1_score:z.number().default(0),
-        solution_2_score:z.number().default(0),
-        solution_1_reasoning:z.string().default(''),
-        solution_2_reasoning:z.string().default(''),
-    })
+  problem: z.string().default(''),
+  solution_1: z.string().default(''),
+  solution_2: z.string().default(''),
+  judge: z.object({
+    solution_1_score: z.number().default(0),
+    solution_2_score: z.number().default(0),
+    solution_1_reasoning: z.string().default(''),
+    solution_2_reasoning: z.string().default(''),
+    judgeFailed: z.boolean().default(false),
+  })
 });
 
-const solutionNode:GraphNode<typeof state>=async(state)=>{
-    const results = await Promise.allSettled([
+const solutionNode: GraphNode<typeof state> = async (state) => {
+  const results = await Promise.allSettled([
     mistralModel.invoke(state.problem),
     cohoreModel.invoke(state.problem),
-    ]);
+  ]);
 
-    const mistral_solution =
+  const mistral_solution =
     results[0].status === "fulfilled"
-        ? results[0].value.text
-        : "Mistral API unavailable";
+      ? results[0].value.text
+      : (console.error("MISTRAL FAILED:", results[0].reason?.status, results[0].reason?.message), "Mistral API unavailable");
 
-    const cohere_solution =
+  const cohere_solution =
     results[1].status === "fulfilled"
-        ? results[1].value.text
-        : "Cohere API unavailable";
+      ? results[1].value.text
+      : (console.error("COHERE FAILED:", results[1].reason?.status, results[1].reason?.message), "Cohere API unavailable");
 
-    return {
+  return {
     solution_1: mistral_solution,
     solution_2: cohere_solution,
-    };
+  };
 }
 
 const judgeNode: GraphNode<typeof state> = async (state) => {
@@ -81,41 +82,36 @@ Evaluate both solutions.
     });
 
     return {
-      judge: judgeResponse.structuredResponse,
+      judge: { ...judgeResponse.structuredResponse, judgeFailed: false },
     };
 
-  } catch (error) {
-    
-    console.log("Gemini Judge Failed:", error);
-
+  } catch (error: any) {
+    console.error("GEMINI JUDGE FAILED — status:", error?.status, "message:", error?.message);
     // fallback response
 
     return {
       judge: {
         solution_1_score: 0,
         solution_2_score: 0,
-
-        solution_1_reasoning:
-          "Gemini Judge API is temporarily unavailable. Solution comparison could not be completed.",
-
-        solution_2_reasoning:
-          "Gemini Judge API is temporarily unavailable. Solution comparison could not be completed.",
+        solution_1_reasoning: "Gemini Judge API is temporarily unavailable. Solution comparison could not be completed.",
+        solution_2_reasoning: "Gemini Judge API is temporarily unavailable. Solution comparison could not be completed.",
+        judgeFailed: true,
       },
     };
   }
 };
 
-const graph=new StateGraph(state)
-    .addNode('solution',solutionNode)
-    .addNode('judge_node',judgeNode)
-    .addEdge(START,'solution')
-    .addEdge('solution','judge_node')
-    .addEdge('judge_node',END)
-    .compile();
+const graph = new StateGraph(state)
+  .addNode('solution', solutionNode)
+  .addNode('judge_node', judgeNode)
+  .addEdge(START, 'solution')
+  .addEdge('solution', 'judge_node')
+  .addEdge('judge_node', END)
+  .compile();
 
-export default async function (problem:string) {
-     const result=await graph.invoke({
-        problem
-     })
-    return result;
+export default async function (problem: string) {
+  const result = await graph.invoke({
+    problem
+  })
+  return result;
 }
